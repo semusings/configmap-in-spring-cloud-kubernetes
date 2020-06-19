@@ -1,3 +1,3 @@
 # Configmap in Spring Cloud Kubernetes
 
-Web: <https://bhuwanupadhyay.github.io/blog/configmap-in-spring-cloud-kubernetes>
+Blog: <https://bhuwanupadhyay.github.io/blog/configmap-in-spring-cloud-kubernetes>
