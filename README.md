@@ -1,3 +1,3 @@
-# Applying Config Map in Spring Cloud Kubernetes using Helm
+# Configmap in Spring Cloud Kubernetes
 
-Web: <https://bhuwanupadhyay.github.io/blog/applying-config-map-in-spring-cloud-kubernetes-using-helm>
+Web: <https://bhuwanupadhyay.github.io/blog/configmap-in-spring-cloud-kubernetes>
