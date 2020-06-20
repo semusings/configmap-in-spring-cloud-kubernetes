@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.BodyContentSpec
+import reactor.core.publisher.Mono
 import java.util.function.Consumer
 
 @ExtendWith(SpringExtension::class)
@@ -40,14 +41,23 @@ class IntegrationTests {
 
     @Test
     fun `return 201 if order created successfully`() {
-        create().jsonPath("$.id").isNotEmpty
+        orderCreate(OrderRequest("item", 10))
+                .expectStatus()
+                .isCreated
+                .expectBody()
+                .jsonPath("$.id").isNotEmpty
                 .jsonPath("$.item").isEqualTo("item")
                 .jsonPath("$.quantity").isEqualTo(10)
     }
 
     @Test
+    fun `return 400 if order not created successfully`() {
+        orderCreate(null).expectStatus().isBadRequest
+    }
+
+    @Test
     fun `return 200 if order get by id successfully`() {
-        val body = create()
+        val body = orderCreated(OrderRequest("item", 10))
         body.jsonPath("$.id").value { id: Long ->
             client
                     .get()
@@ -58,8 +68,21 @@ class IntegrationTests {
     }
 
     @Test
-    fun `return 200 if update order successfully`() {
-        val body = create()
+    fun `return 404 if order id is not found`() {
+        client.get().uri("/orders/10000000000").exchange().expectStatus().isNotFound
+    }
+
+    @Test
+    fun `return 400 if order id is not positive number`() {
+        client.get().uri("/orders/   ").exchange().expectStatus().isBadRequest
+        client.get().uri("/orders/0").exchange().expectStatus().isBadRequest
+        client.get().uri("/orders/-1").exchange().expectStatus().isBadRequest
+        client.get().uri("/orders/abc").exchange().expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `return 200 if order update successfully`() {
+        val body = orderCreated(OrderRequest("item", 10))
         body.jsonPath("$.id").value { id: Long ->
             client
                     .put()
@@ -67,6 +90,25 @@ class IntegrationTests {
                     .jsonPath("$.item").isEqualTo("item-changed")
                     .jsonPath("$.quantity").isEqualTo(20)
         }
+    }
+
+    @Test
+    fun `return 400 if not order update successfully`() {
+        val body = orderCreated(OrderRequest("item", 10))
+        body.jsonPath("$.id").value { id: Long ->
+            client
+                    .put()
+                    .uri("/orders/$id").body(Mono.justOrEmpty(null), OrderRequest::class.java)
+                    .exchange().expectStatus().isBadRequest
+        }
+    }
+
+    @Test
+    fun `return 404 if try update wrong order`() {
+        client
+                .put()
+                .uri("/orders/10000000000").bodyValue(OrderRequest("item-changed", 20))
+                .exchange().expectStatus().isNotFound
     }
 
     @Test
@@ -79,14 +121,19 @@ class IntegrationTests {
                 .jsonPath("$.size()").isEqualTo(2)
     }
 
-    private fun create(): BodyContentSpec {
-        return client
-                .post()
-                .uri("/orders")
-                .bodyValue(OrderRequest("item", 10))
-                .exchange()
+    private fun orderCreated(request: OrderRequest?): BodyContentSpec {
+        return orderCreate(request)
                 .expectStatus()
                 .isCreated
                 .expectBody()
+    }
+
+    private fun orderCreate(request: OrderRequest?): WebTestClient.ResponseSpec {
+        return client
+                .post()
+                .uri("/orders")
+                .body(Mono.justOrEmpty(request), OrderRequest::class.java)
+                .exchange()
+
     }
 }

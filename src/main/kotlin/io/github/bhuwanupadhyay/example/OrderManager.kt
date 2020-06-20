@@ -46,8 +46,7 @@ class OrderHandler(private val repository: OrderRepository) {
     fun findAll(req: ServerRequest) = ok().body(repository.findAll())
 
     fun findOne(req: ServerRequest): Mono<ServerResponse> {
-        return ok().body(repository.findById(evalId(req)))
-                .switchIfEmpty(notFound().build())
+        return repository.findById(evalId(req)).flatMap { ok().bodyValue(it) }.switchIfEmpty(notFound().build())
     }
 
     fun save(req: ServerRequest): Mono<ServerResponse> {
@@ -59,8 +58,13 @@ class OrderHandler(private val repository: OrderRepository) {
         val id = evalId(req)
         return repository.existsById(id)
                 .flatMap {
-                    val payload = req.body(BodyExtractors.toMono(OrderRequest::class.java))
-                    payload.flatMap { ok().body(repository.save(OrderEntity(id, it.item, it.quantity))) }.switchIfEmpty(badRequest().build())
+                    if (it) {
+                        val payload = req.body(BodyExtractors.toMono(OrderRequest::class.java))
+                        payload.flatMap { request -> ok().body(repository.save(OrderEntity(id, request.item, request.quantity))) }
+                                .switchIfEmpty(badRequest().build())
+                    } else {
+                        notFound().build()
+                    }
                 }.switchIfEmpty(notFound().build())
     }
 
