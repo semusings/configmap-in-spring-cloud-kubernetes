@@ -28,5 +28,8 @@ update-charts: ## Update charts
 deploy: ## Helm deploy
 	./helm.sh --deploy
 
+deploy-prod: ## Helm deploy prod
+	./helm.sh --deploy-prod
+
 delete: ## Helm delete
 	./helm.sh --delete

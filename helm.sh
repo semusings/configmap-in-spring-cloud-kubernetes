@@ -18,7 +18,7 @@ printf '\n'
 helm version
 printf '\n'
 
-DEPLOYMENT="example"
+DEPLOYMENT="example-deployment"
 
 CHART_DIR="src/helm-chart"
 
@@ -27,6 +27,19 @@ case ${option} in
    --deploy)
         helm upgrade \
         --install -f $CHART_DIR/values.yaml \
+        --set spring.profiles.active=dev \
+        --set springbootdb.enabled=false \
+        $DEPLOYMENT $CHART_DIR --force
+      ;;
+   --deploy-prod)
+        helm upgrade \
+        --install -f $CHART_DIR/values.yaml \
+        --set spring.profiles.active=prod \
+        --set springbootdb.enabled=true \
+        --set springbootdb.postgresqlDatabase=orders-db \
+        --set springbootdb.postgresqlUsername=user \
+        --set springbootdb.postgresqlPassword=password \
+        --set springbootdb.persistence.enabled=false \
         $DEPLOYMENT $CHART_DIR --force
       ;;
    --update-charts)
