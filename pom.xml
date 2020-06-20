@@ -11,8 +11,8 @@
 	<groupId>io.github.bhuwanupadhyay</groupId>
 	<artifactId>configmap-in-spring-cloud-kubernetes</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>Configmap in Spring Cloud Kubernetes</name>
+	<description>Configmap in Spring Cloud Kubernetes</description>
 
 	<properties>
 		<java.version>11</java.version>
