@@ -18,7 +18,7 @@ data:
     spring:
       profiles: prod
       datasource:
-        url: jdbc:postgresql://{{ .Release.Name }}-spring-boot-db:5432/orders-db
-        username: user
-        password: password
+        url: jdbc:postgresql://{{ .Release.Name }}-spring-boot-db:5432/{{.Values.spring-boot-db.postgresqlDatabase}}
+        username: {{.Values.spring-boot-db.postgresqlUsername}}
+        password: {{.Values.spring-boot-db.postgresqlPassword}}
         driver-class-name: org.postgresql.Driver
