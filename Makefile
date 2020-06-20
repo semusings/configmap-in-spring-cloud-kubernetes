@@ -12,7 +12,7 @@ help:
 ##@ Development
 
 build: ## Build
-	mvn clean install && docker push docker.io/bhuwanupadhyay/configmap-in-spring-cloud-kubernetes:0.0.2-SNAPSHOT
+	mvn clean install && docker push docker.io/bhuwanupadhyay/configmap-in-spring-cloud-kubernetes:0.0.1-SNAPSHOT
 
 ##@ Helm
 
