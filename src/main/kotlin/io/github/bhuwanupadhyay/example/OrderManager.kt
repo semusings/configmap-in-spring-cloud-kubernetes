@@ -17,19 +17,18 @@ import org.springframework.web.reactive.function.server.ServerResponse.*
 import org.springframework.web.reactive.function.server.body
 import org.springframework.web.reactive.function.server.router
 import reactor.core.publisher.Mono
-import java.util.concurrent.atomic.AtomicLong
 
 @Table("ORDERS")
-data class OrderEntity(@Id var id: Long, var item: String, var quantity: Int)
+data class OrderEntity(@Id var id: Long?, var item: String, var quantity: Int)
 
 interface OrderRepository : ReactiveCrudRepository<OrderEntity, Long>
 
 class DomainException(override val message: String, val ex: Throwable?) : RuntimeException(message, ex)
 
+data class OrderRequest(var item: String, var quantity: Int)
+
 @Component
 class OrderHandler(private val repository: OrderRepository) {
-
-    private val sequence: AtomicLong = AtomicLong(1)
 
     private fun evalId(req: ServerRequest): Long {
         try {
@@ -52,15 +51,16 @@ class OrderHandler(private val repository: OrderRepository) {
     }
 
     fun save(req: ServerRequest): Mono<ServerResponse> {
-        val payload = req.body(BodyExtractors.toMono(OrderEntity::class.java))
-        return payload.flatMap { status(HttpStatus.CREATED).body(repository.save(OrderEntity(sequence.incrementAndGet(), it.item, it.quantity))) }.switchIfEmpty(badRequest().build())
+        val payload = req.body(BodyExtractors.toMono(OrderRequest::class.java))
+        return payload.flatMap { status(HttpStatus.CREATED).body(repository.save(OrderEntity(null, it.item, it.quantity))) }.switchIfEmpty(badRequest().build())
     }
 
     fun update(req: ServerRequest): Mono<ServerResponse> {
-        return repository.existsById(evalId(req))
+        val id = evalId(req)
+        return repository.existsById(id)
                 .flatMap {
-                    val payload = req.body(BodyExtractors.toMono(OrderEntity::class.java))
-                    payload.flatMap { ok().body(repository.save(it)) }.switchIfEmpty(badRequest().build())
+                    val payload = req.body(BodyExtractors.toMono(OrderRequest::class.java))
+                    payload.flatMap { ok().body(repository.save(OrderEntity(id, it.item, it.quantity))) }.switchIfEmpty(badRequest().build())
                 }.switchIfEmpty(notFound().build())
     }
 
@@ -91,3 +91,4 @@ class OrderRoutes(private val handler: OrderHandler) {
         }
     }
 }
+

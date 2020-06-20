@@ -20,7 +20,7 @@ import java.util.function.Consumer
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(Alphanumeric::class)
 @ActiveProfiles("test")
-internal class IntegrationTest {
+class IntegrationTests {
     @LocalServerPort
     private val port = 0
     private lateinit var client: WebTestClient
@@ -35,7 +35,7 @@ internal class IntegrationTest {
 
     @AfterEach
     fun tearDown() {
-        repositories.forEach(Consumer { obj: ReactiveCrudRepository<*, *> -> obj.deleteAll() })
+        repositories.forEach(Consumer { obj: ReactiveCrudRepository<*, *> -> obj.deleteAll().block() })
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class IntegrationTest {
         body.jsonPath("$.id").value { id: Long ->
             client
                     .put()
-                    .uri("/orders/$id").bodyValue(OrderEntity(id, "item-changed", 20)).exchange().expectStatus().isOk.expectBody()
+                    .uri("/orders/$id").bodyValue(OrderRequest("item-changed", 20)).exchange().expectStatus().isOk.expectBody()
                     .jsonPath("$.item").isEqualTo("item-changed")
                     .jsonPath("$.quantity").isEqualTo(20)
         }
@@ -83,7 +83,7 @@ internal class IntegrationTest {
         return client
                 .post()
                 .uri("/orders")
-                .bodyValue(OrderEntity(-1, "item", 10))
+                .bodyValue(OrderRequest("item", 10))
                 .exchange()
                 .expectStatus()
                 .isCreated
