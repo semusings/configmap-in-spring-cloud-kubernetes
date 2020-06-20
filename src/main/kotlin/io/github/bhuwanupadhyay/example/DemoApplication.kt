@@ -1,4 +1,4 @@
-package io.github.bhuwanupadhyay.configmapinspringcloudkubernetes
+package io.github.bhuwanupadhyay.example
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
