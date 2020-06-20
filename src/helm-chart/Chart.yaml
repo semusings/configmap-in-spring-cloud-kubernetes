@@ -24,7 +24,7 @@ appVersion: 1.16.0
 
 dependencies:
   - name: postgresql
-    alias: spring-boot-db
-    condition: spring-boot-db.enabled
+    alias: springbootdb
+    condition: springbootdb.enabled
     version: 8.10.5
     repository: https://charts.bitnami.com/bitnami

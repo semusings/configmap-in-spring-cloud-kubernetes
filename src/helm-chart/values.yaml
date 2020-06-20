@@ -77,10 +77,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-spring-boot-db:
-  postgresqlDatabase: orders-db
-  postgresqlUsername: user
-  postgresqlPassword: password
-  persistence:
-    enabled: false
