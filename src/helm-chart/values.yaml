@@ -8,7 +8,7 @@ image:
   repository: docker.io/bhuwanupadhyay/configmap-in-spring-cloud-kubernetes
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.1-SNAPSHOT"
+  tag: "0.0.2-SNAPSHOT"
 
 imagePullSecrets: []
 nameOverride: ""
