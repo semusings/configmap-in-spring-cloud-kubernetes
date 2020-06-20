@@ -88,6 +88,16 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build-image</goal>
+						</goals>
+						<configuration>
+							<imageName>docker.io/bhuwanupadhyay/${project.artifactId}:${project.version}</imageName>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
