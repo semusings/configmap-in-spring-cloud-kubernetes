@@ -33,17 +33,24 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.spring.profiles.active | default dev }}
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
+              value: {{ include "helm-chart.fullname" . }}-config
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAMESPACE
+              value: {{ .Release.Namespace }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /actuator/health
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /actuator/health
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
