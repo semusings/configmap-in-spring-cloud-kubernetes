@@ -124,6 +124,9 @@
 						<goals>
 							<goal>build-image</goal>
 						</goals>
+						<configuration>
+							<imageName>docker.io/bhuwanupadhyay/${project.artifactId}:${project.version}</imageName>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
