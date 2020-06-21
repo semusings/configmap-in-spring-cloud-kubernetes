@@ -6,19 +6,27 @@ metadata:
     {{- include "helm-chart.labels" . | nindent 4 }}
 data:
   application.yaml: |-
+    management:
+      endpoints:
+        web:
+          base-path: /actuator
+          exposure:
+            include: ['configprops', 'env', 'health', 'info', 'logfile', 'loggers', 'threaddump']
+      endpoint:
+        health:
+          show-details: always
     spring:
       application:
         name: order-service
     ---
     spring:
       profiles: dev
-      datasource:
-        driver-class-name: org.h2.Driver
+      r2dbc:
+        url: r2dbc:h2:mem://test?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     ---
     spring:
       profiles: prod
-      datasource:
-        url: jdbc:postgresql://{{ .Release.Name }}-springbootdb:5432/{{ .Values.springbootdb.postgresqlDatabase }}
+      r2dbc:
+        url: r2dbc:postgresql://{{ .Release.Name }}-springbootdb:5432/{{ .Values.springbootdb.postgresqlDatabase }}
         username: {{ .Values.springbootdb.postgresqlUsername }}
         password: {{ .Values.springbootdb.postgresqlPassword }}
-        driver-class-name: org.postgresql.Driver
