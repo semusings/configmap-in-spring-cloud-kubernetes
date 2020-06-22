@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.*
 import org.springframework.web.reactive.function.server.body
 import org.springframework.web.reactive.function.server.router
 import reactor.core.publisher.Mono
+import java.util.*
 
 @Table("ORDERS")
 data class OrderEntity(@Id var id: Long?, var item: String, var quantity: Int)
@@ -29,19 +30,6 @@ data class OrderRequest(var item: String, var quantity: Int)
 
 @Component
 class OrderHandler(private val repository: OrderRepository) {
-
-    private fun evalId(req: ServerRequest): Long {
-        try {
-            val id = req.pathVariable("id").toLong()
-            if (id > 0) {
-                return id
-            } else {
-                throw DomainException(message = "Id should be positive number.", ex = null)
-            }
-        } catch (ex: NumberFormatException) {
-            throw DomainException(message = "Id should be positive number.", ex = ex)
-        }
-    }
 
     fun findAll(req: ServerRequest) = ok().body(repository.findAll())
 
@@ -60,12 +48,19 @@ class OrderHandler(private val repository: OrderRepository) {
                 .flatMap {
                     if (it) {
                         val payload = req.body(BodyExtractors.toMono(OrderRequest::class.java))
-                        payload.flatMap { request -> ok().body(repository.save(OrderEntity(id, request.item, request.quantity))) }
-                                .switchIfEmpty(badRequest().build())
+                        payload.flatMap { request -> ok().body(repository.save(OrderEntity(id, request.item, request.quantity))) }.switchIfEmpty(badRequest().build())
                     } else {
                         notFound().build()
                     }
                 }.switchIfEmpty(notFound().build())
+    }
+
+    private fun evalId(req: ServerRequest): Long {
+        try {
+            return Optional.ofNullable(req.pathVariable("id").toLong()).filter { it > 0 }.orElseThrow { throw DomainException(message = "Id should be positive number.", ex = null) }
+        } catch (ex: NumberFormatException) {
+            throw DomainException(message = "Id should be positive number.", ex = ex)
+        }
     }
 
 }
